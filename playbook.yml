@@ -1,0 +1,15 @@
+- name: Manjaro Sway Desktop Setup
+  hosts: localhost
+  become: yes
+  tasks:
+  - name: pacman Upgrade
+    ansible.builtin.:
+      update_cache: yes
+      upgrade: yes
+  - name: Install packages
+    ansible.builtin.pacman:
+      name:
+        - keepass
+        - yay
+        - code
+      state: present
