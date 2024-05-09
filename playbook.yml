@@ -1,15 +1,26 @@
 - name: Manjaro Sway Desktop Setup
   hosts: localhost
-  become: yes
+  vars:
+    configs:
+      - { src: "sway/config.conf", dest: "~/.config/sway/config.d/config.conf" }
+      - { src: "sway/definitions.conf", dest: "~/.config/sway/definitions.d/definitions.conf" }
+      - { src: "rofi/config.rasi", dest: "~/.config/rofi/config.rasi" }
   tasks:
   - name: pacman Upgrade
-    ansible.builtin.:
+    become: yes
+    pacman:
       update_cache: yes
       upgrade: yes
   - name: Install packages
-    ansible.builtin.pacman:
+    become: yes
+    pacman:
       name:
         - keepass
         - yay
         - code
       state: present
+  - name: Download configs
+    get_url:
+      url: "https://raw.githubusercontent.com/felixkroemer/dotfiles/main/{{ item.src }}"
+      dest: "{{ item.dest }}"
+    loop: "{{ configs }}"
