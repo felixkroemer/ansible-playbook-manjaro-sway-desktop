@@ -5,6 +5,7 @@
       - { src: "sway/config.conf", dest: "~/.config/sway/config.d/config.conf" }
       - { src: "sway/definitions.conf", dest: "~/.config/sway/definitions.d/definitions.conf" }
       - { src: "rofi/config.rasi", dest: "~/.config/rofi/config.rasi" }
+      - { src: "waybar/config.jsonc, dest: "~/.config/waybar/config.jsonc"}
   tasks:
   - name: pacman Upgrade
     become: yes
@@ -16,11 +17,27 @@
     pacman:
       name:
         - keepass
-        - yay
         - code
+        - docker
       state: present
+  - name: Install aur packages
+    shell:
+      cmd: yay --noconfirm -Sy {{ item }}
+    loop:
+      - insomnia
   - name: Download configs
     get_url:
       url: "https://raw.githubusercontent.com/felixkroemer/dotfiles/main/{{ item.src }}"
       dest: "{{ item.dest }}"
     loop: "{{ configs }}"
+  - name: Enable Docker service
+    become: yes
+    systemd_service:
+        name: docker
+        enabled: yes
+  - name: Add user to docker group
+    become: yes
+    user:
+      name: felix
+      groups: docker
+      append: yes
