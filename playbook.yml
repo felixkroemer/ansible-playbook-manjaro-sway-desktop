@@ -5,9 +5,10 @@
       - { src: "sway/config.conf", dest: "~/.config/sway/config.d/config.conf" }
       - { src: "sway/definitions.conf", dest: "~/.config/sway/definitions.d/definitions.conf" }
       - { src: "rofi/config.rasi", dest: "~/.config/rofi/config.rasi" }
-      - { src: "waybar/config.jsonc, dest: "~/.config/waybar/config.jsonc"}
+      - { src: "waybar/config.jsonc", dest: "~/.config/waybar/config.jsonc" }
+      - { src: "broot/conf.hjson", dest: "~/.config/broot/conf.hjson" }
   tasks:
-  - name: pacman Upgrade
+  - name: pacman Upgrade 
     become: yes
     pacman:
       update_cache: yes
@@ -19,6 +20,7 @@
         - keepass
         - code
         - docker
+        - broot
       state: present
   - name: Install aur packages
     shell:
