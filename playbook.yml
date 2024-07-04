@@ -8,7 +8,7 @@
       - { src: "waybar/config.jsonc", dest: "~/.config/waybar/config.jsonc" }
       - { src: "broot/conf.hjson", dest: "~/.config/broot/conf.hjson" }
   tasks:
-  - name: pacman Upgrade 
+  - name: pacman Upgrade
     become: yes
     pacman:
       update_cache: yes
@@ -17,16 +17,22 @@
     become: yes
     pacman:
       name:
-        - keepass
-        - code
+        - keepassxc
         - docker
         - broot
+        - rustup
+        - wireshark-qt
       state: present
   - name: Install aur packages
     shell:
-      cmd: yay --noconfirm -Sy {{ item }}
+      cmd: yay --noconfirm --needed -Sy {{ item }}
+    register: out
+    changed_when: out.rc != 0
     loop:
       - insomnia
+      - visual-studio-code-bin
+      - anki
+      - extra/intellij-idea-community-edition
   - name: Download configs
     get_url:
       url: "https://raw.githubusercontent.com/felixkroemer/dotfiles/main/{{ item.src }}"
