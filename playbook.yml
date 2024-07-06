@@ -49,3 +49,11 @@
       name: felix
       groups: docker
       append: yes
+  - name: Mount nfs
+    become: yes
+    ansible.posix.mount:
+      src: 192.168.0.202:/data
+      path: /home/felix/data
+      opts: rw,sync,hard
+      state: mounted
+      fstype: nfs
