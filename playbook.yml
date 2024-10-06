@@ -7,6 +7,10 @@
       - { src: "rofi/config.rasi", dest: "~/.config/rofi/config.rasi" }
       - { src: "waybar/config.jsonc", dest: "~/.config/waybar/config.jsonc" }
       - { src: "broot/conf.hjson", dest: "~/.config/broot/conf.hjson" }
+  vars_prompt:
+    - name: gists_key
+      prompt: What is the Github gists key?
+      private: no
   tasks:
   - name: pacman Upgrade
     become: yes
@@ -25,13 +29,13 @@
       state: present
   - name: Install aur packages
     shell:
-      cmd: yay --noconfirm --needed -Sy {{ item }}
+      cmd: yay --noconfirm --needed -S {{ item }}
     register: out
     changed_when: out.rc != 0
     loop:
       - insomnia
       - visual-studio-code-bin
-      - anki
+      - anki-bin
       - extra/intellij-idea-community-edition
   - name: Download configs
     get_url:
@@ -49,6 +53,24 @@
       name: felix
       groups: docker
       append: yes
+  - name: Create SSH key
+    shell: |
+      yes y | ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
+      cd $(mktemp -d)
+      wget https://gist.githubusercontent.com/felixkroemer/c628ea1015e56f7d2f42f0c92c67ec92/raw/keys
+      new_entry=$(cat ~/.ssh/id_ed25519.pub)
+      new_user=$(echo "$new_entry" | awk '{print $NF}')
+      if grep -q "$new_user" keys; then
+        sed -i "/$new_user/c\\$new_entry" keys
+      else
+        echo "$new_entry" >> keys
+      fi
+      JSON_PAYLOAD=$(jq -n --arg content "$(cat keys)" '{ "files": { "keys": { "content": $content } } }')
+      curl -X PATCH \
+        -H "Authorization: token {{ gists_key }}" \
+        -H "Content-Type: application/json" \
+        -d "$JSON_PAYLOAD" \
+        "https://api.github.com/gists/c628ea1015e56f7d2f42f0c92c67ec92"
   - name: Mount nfs
     become: yes
     ansible.posix.mount:
