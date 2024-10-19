@@ -9,7 +9,7 @@
       - { src: "broot/conf.hjson", dest: "~/.config/broot/conf.hjson" }
   vars_prompt:
     - name: gists_key
-      prompt: What is the Github gists key?
+      prompt: What is the Github gists key? (Leave empty to skip)
       private: no
   tasks:
   - name: pacman Upgrade
@@ -37,6 +37,8 @@
       - visual-studio-code-bin
       - anki-bin
       - extra/intellij-idea-community-edition
+      - rustrover
+      - rustrover-jre
   - name: Download configs
     get_url:
       url: "https://raw.githubusercontent.com/felixkroemer/dotfiles/main/{{ item.src }}"
@@ -54,6 +56,7 @@
       groups: docker
       append: yes
   - name: Create SSH key
+    when: gists_key != ""
     shell: |
       yes y | ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
       cd $(mktemp -d)
